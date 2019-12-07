@@ -203,8 +203,8 @@ void arrangement(player *p,int clientnum) {
    for (int i = 0; i < p->cardNum-1; i++) {
       if (p->deck[i].num == p->deck[i+1].num)
       {
-         sprintf(message, "%d %c,%d %c is discarded\n", p->deck[i].num, p->deck[i].shape, p->deck[i + 1].num, p->deck[i + 1].shape);
-         sendplayer(clientnum, message);
+		 sprintf(message, "%d %c,%d %c is discarded\n", p->deck[i].num, p->deck[i].shape, p->deck[i + 1].num, p->deck[i + 1].shape);
+		 sendplayer(clientnum, message);
          for (int j = i + 2; j < p->cardNum; j++)
          {
             p->deck[j - 2] = p->deck[j];
@@ -235,7 +235,13 @@ void playerTurn(player* cur, player* opp, int choice) {      //cur 현재, oppon
       opp->deck[j - 1] = opp->deck[j];
    }
    opp->cardNum = opp->cardNum - 1;
-   sprintf(message,"%d %c has chosen!\n", cardData.num, cardData.shape);
+   if (cardData.num)
+   {
+	   sprintf(message, "%d %c was chosen!\n", cardData.num, cardData.shape);
+   }
+   else {
+	   sprintf(message, "******JOKER WAS PICKED*****\n");
+   }
    sendplayer(0,message);
    sendplayer(1,message);
    pushCard(cur, cardData);
@@ -293,7 +299,7 @@ void ifgiveup(int clientnum, char* message)
    {
       if(clientnum == 0)
       {
-         player2.cardNum = 0;
+         player2.cardNum =0;
       }
       else
       {

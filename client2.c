@@ -117,11 +117,12 @@ void printmsg()
 			}
 			else if (strcmp(message, "quit") == 0)
 			{	
+				sleep(3);
 				clear();
 				addstr(message);
 				close(sock);
 				endwin();
-				return 0;
+				exit(1);
 			}
 		//	move(i++, 0);
 			
