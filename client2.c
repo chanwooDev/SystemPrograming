@@ -6,22 +6,20 @@
 #include <sys/socket.h>
 #include <curses.h>
 #include <termios.h>
+#include <signal.h>
 
 #define BUF_SIZE 1024
-
-
-
 
 void error_handling(char *message);
 void printmsg();
 void choicemsg();
+void giveup(int signum);
 
 int sock;
 char message[BUF_SIZE];
 int str_len = 0;
 
 int i = 0;
-
 
 int main(int argc, char *argv[])
 {
@@ -81,7 +79,7 @@ int main(int argc, char *argv[])
 		return 0;
 	}
 	write(sock, message, strlen(message)); //send name
-
+	signal(SIGINT, giveup);
 	while (1)
 	{
 		
@@ -91,9 +89,7 @@ int main(int argc, char *argv[])
 		//	clear();
 	}
 	
-	endwin();
-	close(sock);
-	return 0;
+
 }
 void error_handling(char *message)
 {
@@ -120,8 +116,12 @@ void printmsg()
 				break;
 			}
 			else if (strcmp(message, "quit") == 0)
-			{
-				exit(0);
+			{	
+				clear();
+				addstr(message);
+				close(sock);
+				endwin();
+				return 0;
 			}
 		//	move(i++, 0);
 			
@@ -147,6 +147,26 @@ void printmsg()
 	return;
 }
 
+
+void giveup(int signum)
+{
+	write(sock, "giveups", strlen("giveup")); //send
+	clear();
+	addstr("\n*****************************************\n*************You give up!*************\n*****************************************\n");
+	refresh();
+	sleep(3);
+	close(sock);
+	endwin();
+	exit(0);
+	
+}
+
+
+
+
+
+
+
 /*void choicemsg()
 {
 	move(20, 0); 
@@ -156,3 +176,5 @@ void printmsg()
 	write(sock, message, strlen(message)); //send
 	clear();
 }*/
+
+
