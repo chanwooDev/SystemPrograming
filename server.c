@@ -49,6 +49,7 @@ void pushCard(player* p, card cardData);
 void playerTurn(player* cur, player* opp, int choice);
 void displayTo(player* p, int oppoCardNum,int clientnum);
 void sendplayer(int clientnum, char* msg);
+void ifgiveup(int clientnum,char * message);
 void catching_thief();
 void error_handling(char *message);
 
@@ -234,7 +235,7 @@ void playerTurn(player* cur, player* opp, int choice) {      //cur 현재, oppon
       opp->deck[j - 1] = opp->deck[j];
    }
    opp->cardNum = opp->cardNum - 1;
-   sprintf(message,"%d %c 가 뽑혔습니다\n", cardData.num, cardData.shape);
+   sprintf(message,"%d %c has chosen!\n", cardData.num, cardData.shape);
    sendplayer(0,message);
    sendplayer(1,message);
    pushCard(cur, cardData);
@@ -281,10 +282,25 @@ int getFrom(int clientnum){
 		printf("socket error");
 		exit(1);
 	}
+   ifgiveup(clientnum,message);
+
 	return atoi(message);
 }
 
-
+void ifgiveup(int clientnum, char* message)
+{
+   if (strcmp(message, "giveup") == 0)
+   {
+      if(clientnum == 0)
+      {
+         player2.cardNum = 0;
+      }
+      else
+      {
+         player1.cardNum = 0;
+      }
+   }
+}
 
 void catching_thief() {
    card deck[53]; //전체 덱
@@ -310,6 +326,8 @@ void catching_thief() {
       sleep(1); //to send end..
       sendplayer(0, "end");
       choice = getFrom(0);/* 통신 > 넘버 받아옴 (변수 choice)*/
+      if (isClear(&player2))            //끝났는지 체크
+         break;
       playerTurn(&player1, &player2, choice); //플2 덱에서 플1이 카드선택후 리턴//이 함수 안에서 통신사용 or 숫자만 가져오기
       arrangement(&player1,0);                  //시간복잡도 고려해서 수정할 필요있음
       if (isClear(&player1))            //끝났는지 체크
@@ -320,6 +338,8 @@ void catching_thief() {
       sleep(1);
       sendplayer(1, "end");
       choice = getFrom(1);/* 통신 > 넘버 받아옴 (변수 choice)*/
+      if (isClear(&player1))            //끝났는지 체크
+         break;
       playerTurn(&player2, &player1, choice);
       arrangement(&player2,1);
    }
@@ -338,9 +358,6 @@ void catching_thief() {
       sleep(1);
       sendplayer(0, "quit");
       sendplayer(1, "quit");
-      //display_win_player1();      //player1에게 승리 화면
-      //display_lose_player2();      //player2 에게 패배 화면
-      //changeRecord();            //기록 수정 - file IO
    }
    else
    {
@@ -356,9 +373,6 @@ void catching_thief() {
       sleep(1);
       sendplayer(0, "quit");
       sendplayer(1, "quit");
-      //display_win_player2();      //player1에게 승리 화면
-      //display_lose_player1();      //player2 에게 패배 화면
-      //changeRecord();            //기록 수정 - file IO
    }
    
 
